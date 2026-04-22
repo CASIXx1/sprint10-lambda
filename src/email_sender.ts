@@ -56,6 +56,7 @@ export const handler: SQSHandler = async (event) => {
             console.log("Emailの送信に成功しました:", response.MessageId);
         } catch (error) {
             console.error("SQS recordの処理でエラーが発生しました:", error);
+            throw error;
         }
     }
 };
