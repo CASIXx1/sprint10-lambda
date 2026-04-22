@@ -1,23 +1,14 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { Handler } from "aws-lambda";
 import { AggregatedResult } from "./types";
 
 let s3Client: S3Client | null = null;
-let sqsClient: SQSClient | null = null;
 
 const getS3Client = (): S3Client => {
     if (!s3Client) {
         s3Client = new S3Client({});
     }
     return s3Client;
-};
-
-const getSQSClient = (): SQSClient => {
-    if (!sqsClient) {
-        sqsClient = new SQSClient({});
-    }
-    return sqsClient;
 };
 
 const formatCurrency = (amount: number): string => {
@@ -97,20 +88,8 @@ export const handler: Handler = async (event: any) => {
 
     await getS3Client().send(command);
 
-    const queueUrl = process.env.REPORT_QUEUE_URL;
-    if (queueUrl) {
-        const sqsCommand = new SendMessageCommand({
-            QueueUrl: queueUrl,
-            MessageBody: JSON.stringify({
-                report_key: key,
-                report_content: report
-            }),
-        });
-        await getSQSClient().send(sqsCommand);
-        console.log("SQS queueにレポートを送信しました");
-    }
-
     return {
-        status: "success"
+        report_key: key,
+        report_content: report
     };
 };

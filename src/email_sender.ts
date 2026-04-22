@@ -16,8 +16,9 @@ export const handler: SQSHandler = async (event) => {
     for (const record of event.Records) {
         try {
             const body = JSON.parse(record.body);
-            const reportContent = body.report_content;
-            const reportKey = body.report_key;
+            const payload = body.responsePayload || body;
+            const reportContent = payload.report_content;
+            const reportKey = payload.report_key;
 
             if (!reportContent) {
                 console.error("Report contentがありません");
